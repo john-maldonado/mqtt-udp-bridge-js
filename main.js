@@ -107,12 +107,27 @@ updServer.on('message', function (msg, info) {
     console.log("Family: " + info.family);
     console.log("Port: " + info.port);
     console.log(msg.toString());
-    if (msg.toString() == 'close') {
+
+    // Handle status request
+    if (msg.toString() == 'STATUS') {
+        var udpStatus = true;
+        var mqttStatus = true;
+        var statusMsg = {
+            udp: udpStatus,
+            mqtt: mqttStatus
+        };
+        updServer.send(JSON.stringify(statusMsg), info.port, info.address);
+    };
+
+    // Handle close request
+    if (msg.toString() == 'CLOSE') {
         console.log('UDP Closing');
         client.end();
         updServer.close();
     };
-    if (msg.toString() == 'get') {
+
+    // Handle get request
+    if (msg.toString() == 'GET') {
         updServer.send(JSON.stringify("subs"), info.port, info.address);
     };
 });
