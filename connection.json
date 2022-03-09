@@ -2,6 +2,7 @@
     "udp": {
         "address": "localhost",
         "port": 61558,
+        "appPort": 61559,
         "exclusive": true
     },
     "mqtt": {

@@ -70,6 +70,9 @@ updServer.on('listening', function () {
     console.log('Server is listening at port ' + port);
     console.log('Server ip :' + ipaddr);
     console.log('Server is IP4/IP6 : ' + family);
+    if ('appPort' in connection.udp) {
+        updServer.send('READY', connection.udp.appPort, 'localhost');
+    };
 });
 
 // Define UDP Close Callback
@@ -96,10 +99,3 @@ updServer.on('message', function (msg, info) {
 
 // Create empy subs object
 var subs = {};
-
-// Bind UPD server and start listening
-updServer.bind({
-    address: connection.udp.address,
-    port: connection.udp.port,
-    exclusive: connection.udp.exclusive
-});
