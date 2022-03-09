@@ -15,6 +15,12 @@ const connectionFilePath = args[0];
 let connection = JSON.parse(fs.readFileSync(connectionFilePath));
 //console.log(connection);
 
+// Track first call of connect event
+let connectFirstCall = true;
+
+// Create empty subs object
+let subs = {};
+
 // Create MQTT client and connect
 const client = mqtt.connect(connection.mqtt.address, {
     port: connection.mqtt.port,
@@ -28,10 +34,24 @@ const client = mqtt.connect(connection.mqtt.address, {
 client.on('connect', function () {
     // When MQTT connects
     console.log('MQTT Connected');
+
     // Subscribe to topics
     connection.mqtt.subscriptions.forEach(subscription => {
         client.subscribe(subscription);
     });
+    
+    // On first connect event
+    if (connectFirstCall) {
+        // Bind UPD server and start listening
+        updServer.bind({
+            address: connection.udp.address,
+            port: connection.udp.port,
+            exclusive: connection.udp.exclusive
+        });
+    };
+
+    // Set first call to false
+    connectFirstCall = false;
 });
 
 // Define MQTT Message Callback
@@ -95,14 +115,4 @@ updServer.on('message', function (msg, info) {
     if (msg.toString() == 'get') {
         updServer.send(JSON.stringify("subs"), info.port, info.address);
     };
-});
-
-// Create empy subs object
-var subs = {};
-
-// Bind UPD server and start listening
-updServer.bind({
-    address: connection.udp.address,
-    port: connection.udp.port,
-    exclusive: connection.udp.exclusive
 });
