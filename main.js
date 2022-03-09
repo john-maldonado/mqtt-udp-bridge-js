@@ -1,27 +1,40 @@
+// Require FS to read passed connection file
+const fs = require('fs');
+
+// Require MQTT to create client to connect to MQTT Broker
 const mqtt = require('mqtt');
 
-// creating mqtt client
-//const client  = mqtt.connect('mqtt://test.mosquitto.org');
-
-const client = mqtt.connect('mqtts://b2c17fc672704678b04ea26cf0527305.s2.eu.hivemq.cloud', {
-    port: 8883,
-    username: 'labview-mqtt-bridge-js',
-    password: 'svP5S4mERwx8wDR',
-    rejectUnauthorized: false,
-    clientId: 'labview-mqtt-bridge-js-C8308'
-});
-
-
+// Require dgram to create local UDP server to brige MQTT data to app
 const udp = require('dgram');
 
-// creating a udp server
-const updServer = udp.createSocket('udp4');
+// Get connection file argument
+const args = process.argv.splice(2);
+const connectionFilePath = args[0];
 
-client.on('connect', function () {
-    console.log('MQTT Connected');
-    client.subscribe('flat-mqtt/iMonnit/CDC/Shop/Temperature/#');
+// Read connection file
+let connection = JSON.parse(fs.readFileSync(connectionFilePath));
+//console.log(connection);
+
+// Create MQTT client and connect
+const client = mqtt.connect(connection.mqtt.address, {
+    port: connection.mqtt.port,
+    username: connection.mqtt.username,
+    password: connection.mqtt.password,
+    rejectUnauthorized: connection.mqtt.rejectUnauthorized,
+    clientId: connection.mqtt.clientId
 });
 
+// Define MQTT Connect Callback
+client.on('connect', function () {
+    // When MQTT connects
+    console.log('MQTT Connected');
+    // Subscribe to topics
+    connection.mqtt.subscriptions.forEach(subscription => {
+        client.subscribe(subscription);
+    });
+});
+
+// Define MQTT Message Callback
 client.on('message', function (topic, message) {
     // message is Buffer
     console.log(message.toString());
@@ -29,21 +42,26 @@ client.on('message', function (topic, message) {
     console.log(subs);
 })
 
+// Define MQTT Error Callback
 client.on('error', function (err) {
     console.log(err);
 });
 
+// Define MQTT Close Callback
 client.on('close', function (err) {
     console.log("MQTT Closed");
 })
 
-// emits when any error occurs
+// Create UDP server
+const updServer = udp.createSocket('udp4');
+
+// Define UDP Error Callback
 updServer.on('error', function (error) {
     console.log('Error: ' + error);
     updServer.close();
 });
 
-//emits when socket is ready and listening for datagram msgs
+// Define UDP Listening Callback
 updServer.on('listening', function () {
     var address = updServer.address();
     var port = address.port;
@@ -54,12 +72,17 @@ updServer.on('listening', function () {
     console.log('Server is IP4/IP6 : ' + family);
 });
 
-//emits after the socket is closed using socket.close();
+// Define UDP Close Callback
 updServer.on('close', function () {
     console.log('Socket is closed !');
 });
 
+// Define UDP Message Callback
 updServer.on('message', function (msg, info) {
+    console.log("UDP message recieved.");
+    console.log("Address: " + info.address);
+    console.log("Family: " + info.family);
+    console.log("Port: " + info.port);
     console.log(msg.toString());
     if (msg.toString() == 'close') {
         console.log('UDP Closing');
@@ -67,10 +90,16 @@ updServer.on('message', function (msg, info) {
         updServer.close();
     };
     if (msg.toString() == 'get') {
-        updServer.send(JSON.stringify(subs), 61559, 'localhost');
+        updServer.send(JSON.stringify("subs"), info.port, info.address);
     };
 });
 
+// Create empy subs object
 var subs = {};
 
-updServer.bind(61558);
+// Bind UPD server and start listening
+updServer.bind({
+    address: connection.udp.address,
+    port: connection.udp.port,
+    exclusive: connection.udp.exclusive
+});
