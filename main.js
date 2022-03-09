@@ -35,10 +35,12 @@ client.on('connect', function () {
     // When MQTT connects
     console.log('MQTT Connected');
 
-    // Subscribe to topics
-    connection.mqtt.subscriptions.forEach(subscription => {
-        client.subscribe(subscription);
-    });
+    // Subscribe to topics if listed in connect.json
+    if ('subscriptions' in connection.mqtt) {
+        connection.mqtt.subscriptions.forEach(subscription => {
+            client.subscribe(subscription);
+        });
+    };
     
     // On first connect event
     if (connectFirstCall) {
