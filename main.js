@@ -18,8 +18,8 @@ let connection = JSON.parse(fs.readFileSync(connectionFilePath));
 // Track first call of connect event
 let connectFirstCall = true;
 
-// Create empty subs object
-let subs = {};
+// Create empty subscriptionData object
+let subscriptionData = {};
 
 // Create MQTT client and connect
 const client = mqtt.connect(connection.mqtt.address, {
@@ -58,8 +58,8 @@ client.on('connect', function () {
 client.on('message', function (topic, message) {
     // message is Buffer
     console.log(message.toString());
-    subs[topic] = message.toString();
-    console.log(subs);
+    subscriptionData[topic] = message.toString();
+    console.log(subscriptionData);
 })
 
 // Define MQTT Error Callback
