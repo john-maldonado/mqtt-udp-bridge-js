@@ -99,3 +99,10 @@ updServer.on('message', function (msg, info) {
 
 // Create empy subs object
 var subs = {};
+
+// Bind UPD server and start listening
+updServer.bind({
+    address: connection.udp.address,
+    port: connection.udp.port,
+    exclusive: connection.udp.exclusive
+});
