@@ -7,13 +7,17 @@ const mqtt = require('mqtt');
 // Require dgram to create local UDP server to brige MQTT data to app
 const udp = require('dgram');
 
-// Get connection file argument
-const args = process.argv.splice(2);
-const connectionFilePath = args[0];
+// Read MQTT Settings
+const mqttSettingsPath = './mqtt_settings.json';
+let mqttSettings = JSON.parse(fs.readFileSync(mqttSettingsPath));
 
-// Read connection file
-let connection = JSON.parse(fs.readFileSync(connectionFilePath));
-//console.log(connection);
+// Read UDP Settings
+const udpSettingsPath = './udp_settings.json';
+let udpSettings = JSON.parse(fs.readFileSync(udpSettingsPath));
+
+// Read MQTT Subscription
+const subscriptionsPath = './subscriptions.json';
+let subscriptions = JSON.parse(fs.readFileSync(subscriptionsPath));
 
 // Track first call of connect event
 let connectFirstCall = true;
@@ -24,10 +28,10 @@ let subscriptionData = {};
 // Create MQTT client and connect
 const client = mqtt.connect(connection.mqtt.address, {
     port: connection.mqtt.port,
-    username: connection.mqtt.username,
-    password: connection.mqtt.password,
+    username: connection.mqtt.username, // Use .env
+    password: connection.mqtt.password, // Use .env
     rejectUnauthorized: connection.mqtt.rejectUnauthorized,
-    clientId: connection.mqtt.clientId
+    clientId: connection.mqtt.clientId // construct custom clientID
 });
 
 // Define MQTT Connect Callback
