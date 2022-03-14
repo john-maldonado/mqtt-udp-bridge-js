@@ -1,3 +1,6 @@
+// Require dotenv and read settings from local .env file
+require('dotenv').config()
+
 // Require FS to read passed connection file
 const fs = require('fs');
 
@@ -10,6 +13,8 @@ const udp = require('dgram');
 // Read MQTT Settings
 const mqttSettingsPath = './mqtt_settings.json';
 let mqttSettings = JSON.parse(fs.readFileSync(mqttSettingsPath));
+mqttSettings.username = process.env.MQTT_UNAME;
+mqttSettings.password = process.env.MQTT_PWORD;
 
 // Read UDP Settings
 const udpSettingsPath = './udp_settings.json';
