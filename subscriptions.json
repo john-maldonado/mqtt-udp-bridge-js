@@ -1,0 +1,5 @@
+{
+    "subscriptions": [
+    "flat-mqtt/iMonnit/CDC/Shop/Temperature/#"
+    ]
+}

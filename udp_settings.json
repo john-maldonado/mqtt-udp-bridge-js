@@ -1,0 +1,7 @@
+{
+    "serverAddress": "localhost",
+    "serverPort": 61558,
+    "clientAddress": "localhost",
+    "clientPort": 61559,
+    "exclusive": true
+}

@@ -1,0 +1,5 @@
+{
+    "address":"mqtts://b2c17fc672704678b04ea26cf0527305.s2.eu.hivemq.cloud",
+    "port": 8883,
+    "rejectUnauthorized": false
+}
