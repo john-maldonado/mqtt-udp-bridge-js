@@ -1,6 +1,10 @@
 // Require dotenv and read settings from local .env file
 require('dotenv').config()
 
+// Get hostname to create unique but human readable clientID
+var os = require("os");
+var hostname = os.hostname();
+
 // Require FS to read passed connection file
 const fs = require('fs');
 
@@ -15,6 +19,7 @@ const mqttSettingsPath = './mqtt_settings.json';
 let mqttSettings = JSON.parse(fs.readFileSync(mqttSettingsPath));
 mqttSettings.username = process.env.MQTT_UNAME;
 mqttSettings.password = process.env.MQTT_PWORD;
+mqttSettings.clientId = `${hostname}-mqtt-udp-brige-js`;
 
 // Read UDP Settings
 const udpSettingsPath = './udp_settings.json';
