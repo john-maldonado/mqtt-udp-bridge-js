@@ -31,13 +31,7 @@ let connectFirstCall = true;
 let subscriptionData = {};
 
 // Create MQTT client and connect
-const client = mqtt.connect(connection.mqtt.address, {
-    port: connection.mqtt.port,
-    username: connection.mqtt.username, // Use .env
-    password: connection.mqtt.password, // Use .env
-    rejectUnauthorized: connection.mqtt.rejectUnauthorized,
-    clientId: connection.mqtt.clientId // construct custom clientID
-});
+const client = mqtt.connect(mqttSettings.address, mqttSettings);
 
 // Define MQTT Connect Callback
 client.on('connect', function () {
@@ -45,8 +39,8 @@ client.on('connect', function () {
     console.log('MQTT Connected');
 
     // Subscribe to topics if listed in connect.json
-    if ('subscriptions' in connection.mqtt) {
-        connection.mqtt.subscriptions.forEach(subscription => {
+    if (subscriptions) {
+        subscriptions.forEach(subscription => {
             client.subscribe(subscription);
         });
     };
@@ -55,9 +49,9 @@ client.on('connect', function () {
     if (connectFirstCall) {
         // Bind UPD server and start listening
         updServer.bind({
-            address: connection.udp.address,
-            port: connection.udp.port,
-            exclusive: connection.udp.exclusive
+            address: udpSettings.serverAddress,
+            port: udpSettings.serverPort,
+            exclusive: udpSettings.exclusive
         });
     };
 
@@ -101,8 +95,8 @@ updServer.on('listening', function () {
     console.log('Server is listening at port ' + port);
     console.log('Server ip :' + ipaddr);
     console.log('Server is IP4/IP6 : ' + family);
-    if ('appPort' in connection.udp) {
-        updServer.send('READY', connection.udp.appPort, 'localhost');
+    if ('clientPort' in udpSettings) {
+        updServer.send('READY', udpSettings.clientPort, udpSettings.clientAddress);
     };
 });
 
