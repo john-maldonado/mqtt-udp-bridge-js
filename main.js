@@ -130,6 +130,6 @@ updServer.on('message', function (msg, info) {
 
     // Handle get request
     if (msg.toString() == 'GET') {
-        updServer.send(JSON.stringify("subs"), info.port, info.address);
+        updServer.send(JSON.stringify(subscriptionData), info.port, info.address);
     };
 });
